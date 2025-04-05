@@ -23,7 +23,7 @@ class Kepler:
         self.__solve_kepler()
         self.__true_anomaly()
 
-    def __solve_kepler(self, tol: np.longdouble = 1e-8, max_iter: int = 100) \
+    def __solve_kepler(self, tol: np.longdouble = 1e-8, max_iter: int = 9999) \
             -> None:
         """
         Solves Kepler's equation for the eccentric anomaly E given mean

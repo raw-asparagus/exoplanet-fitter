@@ -83,10 +83,17 @@ class Fitter:
         Returns:
             result (OptimizeResult): The result of the least_squares minimization.
         """
-        self.__fit_result = least_squares(self.__residuals, initial_guess)
+        num_planets: int = (len(initial_guess) - 1) // 5
+        lower_bounds: NDArray[np.longdouble] = np.array(
+            [np.longdouble(0.0), np.longdouble(0.0), np.longdouble(0.0),
+             np.longdouble(0.0), -np.inf] * num_planets + [-np.inf])
+        upper_bounds: NDArray[np.longdouble] = np.array(
+            [np.inf, np.inf, np.inf, np.longdouble(1.0), np.inf] * num_planets
+            + [np.inf])
+        self.__fit_result = least_squares(self.__residuals, initial_guess,
+                                          bounds=(lower_bounds, upper_bounds))
         self.__result = self.__fit_result.x
         self.__compute_uncertainties()
-        num_planets: int = (len(self.__result) - 1) // 5
         v0: np.longdouble = self.__result[-1]
         planets: List[Planet] = []
         for i in range(num_planets):
@@ -109,9 +116,10 @@ class Fitter:
         """
         J: NDArray[np.longdouble] = self.__fit_result.jac
         dof: np.long = np.long(self.__rv_obs.shape[0] - self.__result.shape[0])
-        s_sq: np.longdouble = np.sum(self.__residuals(self.__result) ** 2) / dof
+        s_sq: np.longdouble = (
+                np.sum(np.square(self.__residuals(self.__result))) / dof)
         covariance_matrix: NDArray[np.longdouble] = (
-                np.linalg.inv(J.T.dot(J)) * s_sq)
+                np.linalg.pinv(J.T.dot(J)) * s_sq)
         self.__uncertainties = np.sqrt(np.diag(covariance_matrix))
 
     @property
