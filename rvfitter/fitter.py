@@ -38,7 +38,6 @@ class Fitter:
         self.__rv_err = rv_err if rv_err is not None else (
             np.zeros(rv_obs.shape[0], dtype=np.longdouble))
 
-    # TODO: refactor this to use dataclasses to parse planets
     def __residuals(self, theta: NDArray) -> NDArray:
         """
         Computes residuals between model and observed RV data.
@@ -52,7 +51,6 @@ class Fitter:
               observed RV data.
         """
         num_planets: int = (len(theta) - 1) // 5
-        # TODO: Check if this is a necessary typecast
         v0: np.longdouble = np.longdouble(theta[-1])
         model_rv: NDArray[np.longdouble] = (
                 np.zeros(self.__t.shape[0], dtype=np.longdouble) + v0)
@@ -110,9 +108,8 @@ class Fitter:
         to estimate the reduced chi-squared and then the covariance matrix.
         """
         J: NDArray[np.longdouble] = self.__fit_result.jac
-        dof: np.int128 = self.__rv_obs.shape[0] - self.__result.shape[0]
+        dof: np.long = np.long(self.__rv_obs.shape[0] - self.__result.shape[0])
         s_sq: np.longdouble = np.sum(self.__residuals(self.__result) ** 2) / dof
-        # TODO: fix the type hinting here
         covariance_matrix: NDArray[np.longdouble] = (
                 np.linalg.inv(J.T.dot(J)) * s_sq)
         self.__uncertainties = np.sqrt(np.diag(covariance_matrix))

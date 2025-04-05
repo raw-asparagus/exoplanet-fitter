@@ -47,11 +47,12 @@ class Kepler:
         """
         Converts eccentric anomaly E to true anomaly f.
         """
-        self.__f = 2 * np.arctan(np.sqrt((1 + self.__e) / (1 - self.__e))
-                                  * np.tan(self.__E / 2))
-        # self.__beta = self.__e / (1 + np.sqrt(1 - np.square(self.__e)))
-        # self.__f = self.__E + 2 * np.arctan2(self.__beta * np.sin(self.__E),
-        #                                      1 - self.__beta * np.cos(self.__E))
+        # self.__f = 2 * np.arctan(np.sqrt((1 + self.__e) / (1 - self.__e))
+        #                           * np.tan(self.__E / 2))
+        # Better tangent handling
+        self.__beta = self.__e / (1 + np.sqrt(1 - np.square(self.__e)))
+        self.__f = self.__E + 2 * np.arctan2(self.__beta * np.sin(self.__E),
+                                             1 - self.__beta * np.cos(self.__E))
 
     @property
     def M(self) -> NDArray[np.longdouble]:
